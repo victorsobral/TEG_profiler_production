@@ -22,7 +22,7 @@ from datetime import datetime
 import paho.mqtt.client as mqtt
 import json
 import logging
-import math
+#import math
 
 
 ###########
@@ -52,6 +52,13 @@ def on_disconnect(client, userdata, flags, rc=0):
     logging.info("[MQTT]: Disconnected, result code = " +str(rc)+" at "+str(datetime.utcnow().isoformat()))
 
 
+###########
+# Logging file configurations
+
+logging.basicConfig(filename ='/home/pi/Desktop/shared/TEG_profiler.log', level=logging.INFO) # formating log file
+logging.info('===================================================================')
+logging.info('[Events]: TEG profiler cloud script started at '+str(datetime.utcnow().isoformat()))
+
 
 ###########
 # Profiler configuration settings
@@ -59,7 +66,7 @@ def on_disconnect(client, userdata, flags, rc=0):
 # Reads application info file with application ID and MQTT borker address
 try:
     print("Reading application info file...")
-    with open("Application_info.txt") as json_appInfo:
+    with open("/home/pi/Desktop/Application_info.txt") as json_appInfo:
         APP_INFO = json.load(json_appInfo)
         
 except Exception as e:
@@ -131,11 +138,6 @@ message = {
 
 ##########
 # Main code
-
-logging.basicConfig(filename ='/home/pi/Desktop/shared/TEG_profiler.log', level=logging.INFO) # formating log file
-logging.info('===================================================================')
-logging.info('[Events]: TEG profiler cloud script started at '+str(datetime.utcnow().isoformat()))
-
 
 # # Uncoment to start script after pushing GPIO17 button
 # button = digitalio.DigitalInOut(board.D17)
