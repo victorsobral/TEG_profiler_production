@@ -10,6 +10,10 @@
 import board
 import digitalio
 
+import os
+import threading
+import csv
+
 import adafruit_ads1x15.ads1015 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
@@ -53,12 +57,35 @@ def on_disconnect(client, userdata, flags, rc=0):
 
 
 ###########
+# CSV writing function
+
+def file_writer(file_name, directory, header, data_list):
+    with open(directory+'/'+file_name, 'w') as file:
+        csvwriter = csv.writer(file, delimiter = ',')
+        csvwriter.writerow(header)
+        for row in data_list:
+            csvwriter.writerow(row)
+
+
+###########
 # Logging file configurations
 
 logging.basicConfig(filename ='/home/pi/Desktop/shared/TEG_profiler.log', level=logging.INFO) # formating log file
 logging.info('===================================================================')
 logging.info('[Events]: TEG profiler cloud script started at '+str(datetime.utcnow().isoformat()))
 
+
+###########
+# Local data storage configurations
+
+directory = 'home/pi/Desktop/shared/data'
+
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
+batch_size = 7200 # Equivalent of 1 hour at sampling rate of 0.5 Hz
+header = ['Timestamp', 'voltage_chan_OFF', 'voltage_chan_0', 'voltage_chan_1', 'voltage_chan_2', 'voltage_chan_3', 'temperature_amb', 'temperature_hot']
+data_list = [[None]*8 for i in range(batch_size)] # creates a buffer for all variables with given batch size
 
 ###########
 # Profiler configuration settings
@@ -223,26 +250,31 @@ while True:
         pca.write(bytes([0x01,0x00])) # set all transistor switches off
         time.sleep(0.010)
         message['payload_fields']['voltage_chan_OFF']['value'] = chan.voltage # read TEG open circuit voltage
+        data_list[COUNTER][1] = message['payload_fields']['voltage_chan_OFF']['value']
         time.sleep(0.005)
         
         pca.write(bytes([0x01,0x01])) # open only channel zero switch (0.1 ohm channel)
         time.sleep(0.010)
         message['payload_fields']['voltage_chan_0']['value'] = chan.voltage # read TEG output voltage
+        data_list[COUNTER][2] = message['payload_fields']['voltage_chan_0']['value']
         time.sleep(0.005)
         
         pca.write(bytes([0x01,0x02])) # open only channel one switch (0.47 ohm channel)
         time.sleep(0.010)
         message['payload_fields']['voltage_chan_1']['value'] = chan.voltage # read TEG output voltage
+        data_list[COUNTER][3] = message['payload_fields']['voltage_chan_1']['value']
         time.sleep(0.005)
         
         pca.write(bytes([0x01,0x04])) # open only channel two switch (1.5 ohm channel)
         time.sleep(0.010)
         message['payload_fields']['voltage_chan_2']['value'] = chan.voltage # read TEG output voltage
+        data_list[COUNTER][4] = message['payload_fields']['voltage_chan_2']['value']
         time.sleep(0.005)
         
         pca.write(bytes([0x01,0x08])) # open only channel three switch (4.7 ohm channel)
         time.sleep(0.010)
         message['payload_fields']['voltage_chan_3']['value'] = chan.voltage # read TEG output voltage
+        data_list[COUNTER][5] = message['payload_fields']['voltage_chan_3']['value']
 
 #         if (math.isnan(message['payload_fields']['voltage_chan_OFF']['value']) or
 #            math.isnan(message['payload_fields']['voltage_chan_0']['value']) or
@@ -258,15 +290,17 @@ while True:
    
     try: 
         message['payload_fields']['temperature_amb']['value'] = float(mcp.get_cold_junction_temperature()) # measure ambient temperature (cold junction)
-
+        data_list[COUNTER][6] = message['payload_fields']['temperature_amb']['value']
         message['payload_fields']['temperature_hot']['value'] = float(mcp.get_hot_junction_temperature()) # measure probe temperature (hot junction)
-        
+        data_list[COUNTER][7] = message['payload_fields']['temperature_hot']['value'] 
+
     except Exception as e:
         logging.error("[I2C]: MCP thermocouple amplifier measurements have failed at COUNTER = "+str(COUNTER)+", timestamp = "+str(datetime.utcnow().isoformat()))
         logging.error("[I2C]: "+e) 
 
 
     message['metadata']['time'] = timestamp.isoformat()+'Z'
+    data_list[COUNTER][0] = message['metadata']['time']
 
     message['counter'] = COUNTER
     
@@ -282,6 +316,9 @@ while True:
         logging.error("[MQTT]: "+e) 
 
     if COUNTER == 7200:
+        file_name = timestamp.strftime('%Y%m%d_%H_%M')+'.csv'
+        file_write_thread = threading.Thread(target=file_writer, args = (file_name, directory, header, data_list))
+        file_write_thread.start()
         COUNTER = 0
         print("7200 messages sucessfully transmitted")
         logging.info("[Events]: 7200 messages sucessfully transmitted at "+str(timestamp))
