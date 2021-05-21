@@ -1,6 +1,6 @@
 ################################################
 #
-# TEG profiler script V1.0 
+# TEG profiler script (cloud+local)
 #
 # University of Virginia
 # Author: Victor Ariel Leal Sobral
@@ -320,8 +320,8 @@ while True:
         file_write_thread = threading.Thread(target=file_writer, args = (file_name, directory, header, data_list))
         file_write_thread.start()
         COUNTER = 0
-        print("7200 messages sucessfully transmitted")
-        logging.info("[Events]: 7200 messages sucessfully transmitted at "+str(timestamp))
+        print("7200 messages sucessfully transmitted and locally stored")
+        logging.info("[Events]: 7200 messages sucessfully transmitted and locally stored at "+str(timestamp))
         
     
     # Hold button on GPIO17 to exit script
