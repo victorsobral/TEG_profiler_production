@@ -195,7 +195,7 @@ client.loop_start()
 time.sleep(1)
 
 print("Subscribing to linklab/teg_eh_profiler topic...")
-client.subscribe("linklab/teg_eh_profiler", qos=1)
+client.subscribe("linklab/teg_eh_profiler", qos=0)
 time.sleep(2)
 
 print("Starting I2C devices...")
