@@ -102,7 +102,7 @@ except Exception as e:
     logging.error("[FileIO]: "+e)
     raise
 
-BROKER_ADDRESS = APP_INFO["BROKER_ADDRESS"] # IP address of the MQTT broker
+BROKER_ADDRESS = '34.230.161.172' # APP_INFO["BROKER_ADDRESS"] # IP address of the MQTT broker
 APP_ID = APP_INFO["APP_ID"] # how this application will be identified in the cloud database
 SAMPLING_PERIOD = 0.5 # in seconds (max 0.1)
 
