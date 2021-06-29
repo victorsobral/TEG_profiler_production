@@ -61,7 +61,7 @@ def on_disconnect(client, userdata, flags, rc=0):
 ###########
 # MQTT publishing function
 
-def cloud_upload(APP_ID,BROKER_ADDRESS,SAMPLING_PERIOD, message, data_list):
+def cloud_upload(APP_ID,BROKER_ADDRESS, data_list):
 
     # Standard message with fields expected by the MQTT broker
     message = {
@@ -149,7 +149,6 @@ def cloud_upload(APP_ID,BROKER_ADDRESS,SAMPLING_PERIOD, message, data_list):
 
         client.publish("linklab/teg_eh_profiler",json.dumps(message),qos=0)
         time.sleep(0.2)
-        print(datetime.utcnow())
 
 
     client.loop_stop()
@@ -323,7 +322,7 @@ while True:
         file_write_thread = threading.Thread(target=file_writer, args = (file_name, directory, header, data_list))
         file_write_thread.start()
 
-        cloud_upload_thread = threading.Thread(target=cloud_upload, args = (APP_ID,BROKER_ADDRESS,SAMPLING_PERIOD, message, data_list))
+        cloud_upload_thread = threading.Thread(target=cloud_upload, args = (APP_ID,BROKER_ADDRESS, data_list))
         cloud_upload_thread.start()
         
         COUNTER = 0
