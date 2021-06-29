@@ -78,7 +78,7 @@ logging.info('[Events]: TEG profiler cloud script started at '+str(datetime.utcn
 ###########
 # Local data storage configurations
 
-directory = 'home/pi/Desktop/shared/data'
+directory = '/home/pi/Desktop/shared/data'
 
 if not os.path.exists(directory):
     os.makedirs(directory)
@@ -315,13 +315,13 @@ while True:
         logging.error("[MQTT]: Publish error")
         logging.error("[MQTT]: "+e) 
 
-    if COUNTER == 7200:
+    if COUNTER == batch_size:
         file_name = timestamp.strftime('%Y%m%d_%H_%M')+'.csv'
         file_write_thread = threading.Thread(target=file_writer, args = (file_name, directory, header, data_list))
         file_write_thread.start()
         COUNTER = 0
-        print("7200 messages sucessfully transmitted and locally stored")
-        logging.info("[Events]: 7200 messages sucessfully transmitted and locally stored at "+str(timestamp))
+        print(str(batch_size)+" messages sucessfully transmitted and locally stored")
+        logging.info("[Events]: "+str(batch_size)+" messages sucessfully transmitted and locally stored at "+str(timestamp))
         
     
     # Hold button on GPIO17 to exit script
