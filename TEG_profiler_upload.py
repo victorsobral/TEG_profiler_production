@@ -5,7 +5,7 @@ import requests
 
 import json
 
-import time
+# import time
 
 storage_path = '/home/pi/Desktop/shared/data'
 
@@ -20,7 +20,7 @@ filename_list = [f for f in listdir(storage_path) if isfile(join(storage_path, f
 for filename in filename_list:
 	with open(join(storage_path, filename)) as csv_file:
 		r=requests.post("http://73.251.37.2:1237/upload", files={'upload':csv_file}, headers={'APP_ID':APP_ID})
-		time.sleep(2)
+		# time.sleep(2)
 
 
 
