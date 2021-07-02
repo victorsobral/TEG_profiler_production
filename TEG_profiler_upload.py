@@ -21,12 +21,12 @@ with open('/home/pi/Desktop/shared/TEG_local_storage_list.txt', 'w') as file:
 
 with open('/home/pi/Desktop/shared/TEG_local_storage_list.txt') as txt_file:
 	r=requests.post("http://73.251.37.2:1237/upload", files={'upload':txt_file}, headers={'APP_ID':APP_ID})
-	time.sleep(0.5)
+	time.sleep(0.2)
 
 for filename in filename_list:
 	with open(join(storage_path, filename)) as csv_file:
 		r=requests.post("http://73.251.37.2:1237/upload", files={'upload':csv_file}, headers={'APP_ID':APP_ID})
-		time.sleep(0.5)
+		time.sleep(0.2)
 
 
 
