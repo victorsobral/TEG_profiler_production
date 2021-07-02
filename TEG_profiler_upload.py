@@ -14,6 +14,8 @@ APP_ID = APP_INFO["APP_ID"]
 
 filename_list = [f for f in listdir(storage_path) if isfile(join(storage_path, f))]
 
+filename_list.sort()
+
 with open('/home/pi/Desktop/shared/TEG_local_storage_list.txt', 'w') as file:
 	csvwriter = csv.writer(file)
 	for row in filename_list:
