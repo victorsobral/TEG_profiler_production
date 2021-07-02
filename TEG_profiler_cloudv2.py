@@ -45,6 +45,7 @@ import logging
     
 def on_connect(client, userdata, flags, rc):
     if rc ==0:
+        client.connected_flag=True
         print("Successfully connected")
         logging.info("[MQTT]: Successfully connected at "+str(datetime.utcnow().isoformat()))
     else:
@@ -63,6 +64,7 @@ def on_disconnect(client, userdata, flags, rc=0):
 
 def cloud_upload(APP_ID,BROKER_ADDRESS, data_list):
 
+    print("... starting cloud upload thread")
     # Standard message with fields expected by the MQTT broker
     message = {
        "app_id":APP_ID,
@@ -117,7 +119,6 @@ def cloud_upload(APP_ID,BROKER_ADDRESS, data_list):
        }
     }
 
- 
     client = mqtt.Client(APP_ID) # Creates a new MQTT client instance
     # client.on_log = on_log
     # client.on_message = on_message
@@ -127,13 +128,19 @@ def cloud_upload(APP_ID,BROKER_ADDRESS, data_list):
     # client.reconnect_delay_set(min_delay=10, max_delay=120)
 
     client.connect(BROKER_ADDRESS) # Connects to MQTT broker
-    # time.sleep(2)
+
+    timeout = 10 # Checks connection status for 10 seconds
+    while not client.connected_flag:
+        time.sleep(1)
+        timeout = timeout - 1
+        if timeout <= 0:
+            print("connection timeout failure!")
+            logging.error("[MQTT]: Cloud upload thread exited due to connection timeout at "+str(datetime.utcnow().isoformat()))
+            return None
 
     client.loop_start()
-    # time.sleep(1)
 
     client.subscribe("linklab/teg_eh_profiler", qos=0) # Subscribes to linklab/teg_eh_profiler topic
-    # time.sleep(2)
 
     for COUNTER in range(len(data_list)):
 
@@ -150,19 +157,24 @@ def cloud_upload(APP_ID,BROKER_ADDRESS, data_list):
         client.publish("linklab/teg_eh_profiler",json.dumps(message),qos=0)
         time.sleep(0.2)
 
-
     client.loop_stop()
+    client.disconnect() # disconnect
+    print("cloud upload thread complete!")
+    return None
 
 
 ###########
 # CSV writing function
 
 def file_writer(file_name, directory, header, data_list):
+    print("... starting local storage thread")
     with open(directory+'/'+file_name, 'w') as file:
         csvwriter = csv.writer(file, delimiter = ',')
         csvwriter.writerow(header)
         for row in data_list:
             csvwriter.writerow(row)
+    print("local storage thread complete!")
+    return None
 
 
 ###########
@@ -327,8 +339,8 @@ while True:
         
         COUNTER = 0
 
-        print(str(batch_size)+" messages sucessfully transmitted and locally stored")
-        logging.info("[Events]: "+str(batch_size)+" messages sucessfully transmitted and locally stored at "+str(timestamp))
+        print(str(batch_size)+" messages sucessfully acquired and local store and upload threads started!")
+        logging.info("[Events]: "+str(batch_size)+" messages sucessfully acquired and local store and upload threads started at "+str(timestamp))
         
     
     # Hold button on GPIO17 to exit script
@@ -341,7 +353,7 @@ while True:
 
 print("TEG profiler cloud script interrupted")    
 logging.info('[Events]: TEG profiler cloud script interrupted at '+str(datetime.utcnow().isoformat()))    
-print("data acquisition complete")
+print("Main data acquisition script complete, wait for local store and cloud upload threads to finish")
 
 
 

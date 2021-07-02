@@ -192,7 +192,7 @@ client.connect(BROKER_ADDRESS)
 time.sleep(2)
 
 client.loop_start()
-time.sleep(1)
+time.sleep(4)
 
 print("Subscribing to linklab/teg_eh_profiler topic...")
 client.subscribe("linklab/teg_eh_profiler", qos=0)
