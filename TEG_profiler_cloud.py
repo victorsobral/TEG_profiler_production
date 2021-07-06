@@ -45,7 +45,6 @@ import logging
     
 def on_connect(client, userdata, flags, rc):
     if rc ==0:
-        client.connected_flag=True
         print("Successfully connected")
         logging.info("[MQTT]: Successfully connected at "+str(datetime.utcnow().isoformat()))
     else:
@@ -129,16 +128,8 @@ def cloud_upload(APP_ID,BROKER_ADDRESS, data_list):
 
     client.connect(BROKER_ADDRESS) # Connects to MQTT broker
 
-    timeout = 10 # Checks connection status for 10 seconds
-    while not client.connected_flag:
-        time.sleep(1)
-        timeout = timeout - 1
-        if timeout <= 0:
-            print("connection timeout failure!")
-            logging.error("[MQTT]: Cloud upload thread exited due to connection timeout at "+str(datetime.utcnow().isoformat()))
-            return None
-
     client.loop_start()
+    time.sleep(4)
 
     client.subscribe("linklab/teg_eh_profiler", qos=0) # Subscribes to linklab/teg_eh_profiler topic
 
