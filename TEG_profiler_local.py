@@ -49,7 +49,7 @@ logging.info('[Events]: TEG profiler local script started at '+str(datetime.utcn
 ###########
 # Local data storage configurations
 
-directory = '/home/pi/Desktop/shared/data'
+directory = '/home/pi/Desktop/data'
 
 if not os.path.exists(directory):
     os.makedirs(directory)
@@ -58,22 +58,22 @@ batch_size = 7200 # Equivalent of 1 hour at sampling rate of 0.5 Hz
 header = ['Timestamp', 'voltage_chan_OFF', 'voltage_chan_0', 'voltage_chan_1', 'voltage_chan_2', 'voltage_chan_3', 'temperature_amb', 'temperature_hot']
 data_list = [[None]*8 for i in range(batch_size)] # creates a buffer for all variables with given batch size
 
-###########
-# Profiler configuration settings
+# ###########
+# # Profiler configuration settings
 
-# Reads application info file with application ID 
-try:
-    print("Reading application info file...")
-    with open("/home/pi/Desktop/Application_info.txt") as json_appInfo:
-        APP_INFO = json.load(json_appInfo)
+# # Reads application info file with application ID 
+# try:
+#     print("Reading application info file...")
+#     with open("/home/pi/Desktop/Application_info.txt") as json_appInfo:
+#         APP_INFO = json.load(json_appInfo)
         
-except Exception as e:
-    print("Application info file could not be loaded")
-    logging.error("[FileIO]: Application info file could not be loaded")
-    logging.error("[FileIO]: "+e)
-    raise
+# except Exception as e:
+#     print("Application info file could not be loaded")
+#     logging.error("[FileIO]: Application info file could not be loaded")
+#     logging.error("[FileIO]: "+e)
+#     raise
 
-APP_ID = APP_INFO["APP_ID"] # how this application will be identified in the database
+# APP_ID = APP_INFO["APP_ID"] # how this application will be identified in the database
 SAMPLING_PERIOD = 0.5 # in seconds (max 0.1)
 
 
