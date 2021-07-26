@@ -7,6 +7,8 @@ import csv
 
 storage_path = '/home/pi/Desktop/shared/data'
 
+server_address = "???.???.??.?:??" # format is IP:port 
+
 with open("/home/pi/Desktop/Application_info.txt") as json_appInfo:
 	APP_INFO = json.load(json_appInfo)
 
@@ -22,7 +24,7 @@ with open('/home/pi/Desktop/shared/TEG_local_storage_list.txt', 'w') as file:
 		csvwriter.writerow([row])
 
 with open('/home/pi/Desktop/shared/TEG_local_storage_list.txt') as txt_file:
-	r=requests.post("http://73.251.37.2:1237/upload", files={'upload':txt_file}, headers={'APP_ID':APP_ID})
+	r=requests.post("http://"+server_address+"/upload", files={'upload':txt_file}, headers={'APP_ID':APP_ID})
 	time.sleep(0.2)
 
 for filename in filename_list:
